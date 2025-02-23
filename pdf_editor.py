@@ -1,3 +1,5 @@
+"""Module to extract pages from a PDF that belong to chapters."""
+
 import argparse
 import re
 from array import array
@@ -12,10 +14,14 @@ PRELIMINARY_PAGES: int = 29  # starts at 0
 
 
 class ImproperPageRange(Exception):
+    """Exception raised when the page range is invalid."""
+
     pass
 
 
 class RegexPatternsMixin:
+    """Regex patterns used in the program."""
+
     @staticmethod
     def page_num_pipe_label() -> re.Pattern[str]:
         """
@@ -78,6 +84,8 @@ class RegexPatternsMixin:
 
 
 class ParsePDF:
+    """Parse a PDF and extract chapter pages."""
+
     def __init__(
         self,
         output_pdf: str,
@@ -85,6 +93,7 @@ class ParsePDF:
         writer: PdfWriter,
         page_range: tuple[int, int] | None = None,
     ) -> None:
+        """Initialize the ParsePDF class."""
         # Attributes
         self.output_pdf: str = output_pdf
         self.reader: PdfReader = reader
@@ -183,6 +192,7 @@ class ParsePDF:
             self.writer.add_page(page=self.reader.pages[page])
 
     def run(self) -> None:
+        """Run the main method to parse a PDF and extract chapter pages."""
         all_pages: list[PageObject] = self.reader.pages
         if not self.page_range:
             for i, page in enumerate(iterable=all_pages):
@@ -252,6 +262,7 @@ def parse_tuple(range_str: str) -> tuple[int, int]:
 
 
 def main() -> None:
+    """Run the main function."""
     parser = argparse.ArgumentParser(
         description="Extract pages from a PDF that belong to chapters.",
     )
