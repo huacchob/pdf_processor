@@ -1,10 +1,12 @@
 import argparse
 import re
-import typing as t
 from array import array
+from typing import TYPE_CHECKING
 
 from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2._page import PageObject
+
+if TYPE_CHECKING:
+    from PyPDF2._page import PageObject
 
 PRELIMINARY_PAGES: int = 29  # starts at 0
 
@@ -89,7 +91,7 @@ class ParsePDF:
         self.writer: PdfWriter = writer
         self.page_range: tuple[int, int] | None = page_range
 
-        self.valid_page_indices: list[t.Optional[int]] = []
+        self.valid_page_indices: list[int | None] = []
 
         # Regex patterns
         self.pattern_num_pipe_label: re.Pattern[str] = (
@@ -121,10 +123,10 @@ class ParsePDF:
 
         label_string: str = ""
         lines: list[str] = text.splitlines()
-        for line in lines:
-            if not line:
+        for l in lines:
+            if not l:
                 continue
-            line: str = line.strip()
+            line: str = l.strip()
 
             match1 = self.pattern_num_pipe_label.match(string=line)
             match2 = self.pattern_label_pipe_num.match(string=line)
@@ -164,6 +166,10 @@ class ParsePDF:
         Returns:
             bool: True if the page is within the page range.
         """
+        if not self.page_range:
+            raise ImproperPageRange(
+                "Must be a tuple of two integers, e.g. (1,10)",
+            )
         start, end = self.page_range
         page_numbers: array[int] = array(
             "i",
@@ -177,7 +183,7 @@ class ParsePDF:
             self.writer.add_page(page=self.reader.pages[page])
 
     def run(self) -> None:
-        all_pages: t.List[PageObject] = self.reader.pages
+        all_pages: list[PageObject] = self.reader.pages
         if not self.page_range:
             for i, page in enumerate(iterable=all_pages):
                 text: str = page.extract_text() or ""
@@ -215,7 +221,7 @@ def extract_chapter_pages(
     return reader, PdfWriter()
 
 
-def parse_tuple(range_str: str) -> t.Tuple[int, int]:
+def parse_tuple(range_str: str) -> tuple[int, int]:
     """
     Parse a string representing a tuple of two integers, e.g. "(1,10)".
 
@@ -262,7 +268,7 @@ def main() -> None:
         input_pdf=args.input_pdf,
     )
 
-    pdf: ParsePDF = ParsePDF(
+    ParsePDF(
         output_pdf=args.output_pdf,
         reader=reader,
         writer=writer,
