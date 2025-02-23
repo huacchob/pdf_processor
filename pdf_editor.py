@@ -13,36 +13,6 @@ class ImproperPageRange(Exception):
     pass
 
 
-def parse_tuple(range_str: str) -> t.Tuple[int, int]:
-    """
-    Parse a string representing a tuple of two integers, e.g. "(1,10)".
-
-    Args:
-        s (str): The input string.
-
-    Returns:
-        Tuple[int, int]: A tuple of two integers.
-
-    Raises:
-        argparse.ArgumentTypeError: If the input is not in the correct format.
-    """
-    match_start_end: re.Pattern[str] = re.compile(
-        pattern=r"^\s*\(\s*(?P<start>\d+?)\s*,\s*(?P<end>\d+?)\s*\)\s*$"
-    )
-    if start_end := match_start_end.search(string=range_str):
-        try:
-            start = int(start_end.group("start"))
-            end = int(start_end.group("end"))
-        except ValueError:
-            raise ImproperPageRange(
-                "Both values in the tuple must be integers",
-            )
-    else:
-        raise ImproperPageRange("Must be a tuple of two integers, e.g. (1,10)")
-
-    return (start, end)
-
-
 class RegexPatternsMixin:
     @staticmethod
     def page_num_pipe_label() -> re.Pattern[str]:
@@ -224,7 +194,9 @@ class ParsePDF:
         with open(file=self.output_pdf, mode="wb") as f:
             self.writer.write(stream=f)  # type: ignore
 
-        print(f"New PDF with selected chapter pages saved as '{self.output_pdf}'.")
+        print(
+            f"New PDF with selected chapter pages saved as '{self.output_pdf}'.",
+        )
 
 
 def extract_chapter_pages(
@@ -241,6 +213,36 @@ def extract_chapter_pages(
     except FileNotFoundError as file:
         raise FileNotFoundError(f"File {input_pdf} not found.") from file
     return reader, PdfWriter()
+
+
+def parse_tuple(range_str: str) -> t.Tuple[int, int]:
+    """
+    Parse a string representing a tuple of two integers, e.g. "(1,10)".
+
+    Args:
+        range_str (str): The input string.
+
+    Returns:
+        Tuple[int, int]: A tuple of two integers.
+
+    Raises:
+        argparse.ArgumentTypeError: If the input is not in the correct format.
+    """
+    match_start_end: re.Pattern[str] = re.compile(
+        pattern=r"^\s*\(\s*(?P<start>\d+?)\s*,\s*(?P<end>\d+?)\s*\)\s*$"
+    )
+    if start_end := match_start_end.search(string=range_str):
+        try:
+            start = int(start_end.group("start"))
+            end = int(start_end.group("end"))
+        except ValueError:
+            raise ImproperPageRange(
+                "Both values in the tuple must be integers",
+            )
+    else:
+        raise ImproperPageRange("Must be a tuple of two integers, e.g. (1,10)")
+
+    return (start, end)
 
 
 def main() -> None:
@@ -265,8 +267,7 @@ def main() -> None:
         reader=reader,
         writer=writer,
         page_range=args.pages if args.pages else None,
-    )
-    pdf.run()
+    ).run()
 
 
 if __name__ == "__main__":
