@@ -4,8 +4,9 @@ import typing as t
 from array import array
 
 from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2._page import PageObject
 
-PRELIMINARY_PAGES: int = 34  # starts at 0
+PRELIMINARY_PAGES: int = 29  # starts at 0
 
 
 class ImproperPageRange(Exception):
@@ -105,12 +106,22 @@ class RegexPatternsMixin:
 
 
 class ParsePDF:
-    def __init__(self, text: str) -> None:
-        self.text: str = text
-        self.is_valid: bool = False
+    def __init__(
+        self,
+        output_pdf: str,
+        reader: PdfReader,
+        writer: PdfWriter,
+        page_range: tuple[int, int] | None = None,
+    ) -> None:
+        # Attributes
+        self.output_pdf: str = output_pdf
+        self.reader: PdfReader = reader
+        self.writer: PdfWriter = writer
+        self.page_range: tuple[int, int] | None = page_range
 
-        self.label_string: str = ""
+        self.valid_page_indices: list[t.Optional[int]] = []
 
+        # Regex patterns
         self.pattern_num_pipe_label: re.Pattern[str] = (
             RegexPatternsMixin.page_num_pipe_label()
         )
@@ -124,7 +135,7 @@ class ParsePDF:
         self.ignore_lables: re.Pattern[str] = RegexPatternsMixin.page_lables_to_ignore()
         self.ignore_text: re.Pattern[str] = RegexPatternsMixin.text_to_ignore()
 
-    def is_chapter_page(self) -> bool:
+    def is_chapter_page(self, text: str) -> bool:
         """
         Determine if a page is a chapter page.
 
@@ -134,105 +145,102 @@ class ParsePDF:
         Returns:
             bool: True if the page is a chapter page
         """
-        lines: list[str] = self.text.splitlines()
+        is_valid: bool = False
+        if not text:
+            return is_valid
+
+        label_string: str = ""
+        lines: list[str] = text.splitlines()
         for line in lines:
-            line: str = line.strip()
             if not line:
                 continue
+            line: str = line.strip()
 
-            match1: re.Match[str] | None = self.pattern_num_pipe_label.match(
-                string=line,
-            )
+            match1 = self.pattern_num_pipe_label.match(string=line)
+            match2 = self.pattern_label_pipe_num.match(string=line)
+            match3 = self.simple_number_pattern.match(string=line)
+
             if match1:
-                self.label_string: str = match1.group("label")
-                self.is_valid = True
-                break
-
-            match2: re.Match[str] | None = self.pattern_label_pipe_num.match(
-                string=line,
-            )
-            if match2 and self.is_valid is False:
-                self.label_string: str = match2.group("label")
-                self.is_valid = True
-                break
-
-        # Check for a line that is just a page number.
-        if self.is_valid is False:
-            for line in lines:
-                if not line:
+                label_string = match1.group("label")
+                if self.ignore_lables.search(
+                    string=label_string.lower()
+                ) or self.ignore_text.search(string=text):
                     continue
-                line = line.strip()
-                if self.simple_number_pattern.match(string=line):
-                    if self.chapter_in_page.search(string=self.text):
-                        self.is_valid = True
-                        break
+                is_valid = True
+                break
 
-        if self.ignore_lables.search(
-            string=self.label_string
-        ) or self.ignore_text.search(
-            string=self.text,
-        ):
-            self.is_valid = False
+            elif match2:
+                label_string = match2.group("label")
+                if self.ignore_lables.search(
+                    string=label_string.lower()
+                ) or self.ignore_text.search(string=text):
+                    continue
+                is_valid = True
+                break
 
-        return self.is_valid
+            elif match3:
+                if self.chapter_in_page.search(string=text):
+                    if self.ignore_text.search(string=text):
+                        continue
+                    is_valid = True
+                    break
 
-    def is_within_page_range(self, page_range: tuple[int, int]) -> bool:
+        return is_valid
+
+    def within_page_range(self) -> None:
         """
         Determine if a page is within the page range.
-
-        Args:
-            text (str): The text of the page
 
         Returns:
             bool: True if the page is within the page range.
         """
-        start, end = page_range
-        page_numbers: array[int] = array("i", range(start, end + 1))
+        start, end = self.page_range
+        page_numbers: array[int] = array(
+            "i",
+            range(
+                start + PRELIMINARY_PAGES,
+                end + PRELIMINARY_PAGES + 1,
+            ),
+        )
         for page in page_numbers:
-            page_num: int = page_num + PRELIMINARY_PAGES
-            try:
-                
-        
+            self.valid_page_indices.append(page)
+            self.writer.add_page(page=self.reader.pages[page])
+
+    def run(self) -> None:
+        all_pages: t.List[PageObject] = self.reader.pages
+        if not self.page_range:
+            for i, page in enumerate(iterable=all_pages):
+                text: str = page.extract_text() or ""
+                if self.is_chapter_page(text=text):
+                    self.valid_page_indices.append(i)
+                    self.writer.add_page(page=page)
+        if self.page_range:
+            self.within_page_range()
+
+        if not self.valid_page_indices:
+            print("No valid chapter pages found.")
+            return
+
+        with open(file=self.output_pdf, mode="wb") as f:
+            self.writer.write(stream=f)  # type: ignore
+
+        print(f"New PDF with selected chapter pages saved as '{self.output_pdf}'.")
 
 
 def extract_chapter_pages(
     input_pdf: str,
-    output_pdf: str,
-    page_range: t.Optional[tuple[int, int]] = None,
-) -> None:
+) -> tuple[PdfReader, PdfWriter]:
     """
     Extract pages from a PDF that belong to chapters (or their sub-sections).
 
     Args:
         input_pdf (str): Input PDF file path.
-        output_pdf (str): Output PDF file path.
     """
-    reader: PdfReader = PdfReader(stream=input_pdf)
-    writer: PdfWriter = PdfWriter()
-    valid_page_indices: list[t.Optional[int]] = []
-
-    for i, page in enumerate(iterable=reader.pages):
-        text: str = page.extract_text() or ""
-        pdf_parser: ParsePDF = ParsePDF(text=text)
-        if not page_range and pdf_parser.is_chapter_page():
-            valid_page_indices.append(i)
-            writer.add_page(page=page)
-        elif page_range and pdf_parser.is_within_page_range(
-            page_range=page_range,
-        ):
-            valid_page_indices.append(i)
-            writer.add_page(page=page)
-            if len(writer.pages) == (page_range[1] + 1) - page_range[0]:
-                break
-
-    if not valid_page_indices:
-        print("No valid chapter pages found.")
-        return
-
-    with open(file=output_pdf, mode="wb") as f:
-        writer.write(stream=f)  # type: ignore
-
-    print(f"New PDF with selected chapter pages saved as '{output_pdf}'.")
+    try:
+        reader: PdfReader = PdfReader(stream=input_pdf)
+    except FileNotFoundError as file:
+        raise FileNotFoundError(f"File {input_pdf} not found.") from file
+    return reader, PdfWriter()
 
 
 def main() -> None:
@@ -248,11 +256,17 @@ def main() -> None:
     )
     args: argparse.Namespace = parser.parse_args()
 
-    extract_chapter_pages(
+    reader, writer = extract_chapter_pages(
         input_pdf=args.input_pdf,
+    )
+
+    pdf: ParsePDF = ParsePDF(
         output_pdf=args.output_pdf,
+        reader=reader,
+        writer=writer,
         page_range=args.pages if args.pages else None,
     )
+    pdf.run()
 
 
 if __name__ == "__main__":
