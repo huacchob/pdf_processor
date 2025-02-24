@@ -7,7 +7,7 @@ from typing import Protocol, Sequence, runtime_checkable
 from PyPDF2 import PdfReader, PdfWriter
 
 from .handler import HandleBook
-from .patterns import RegexPatterns as rp
+from .patterns import ITBookPatterns as it
 
 PRELIMINARY_PAGES: int = 29  # starts at 0
 
@@ -62,12 +62,12 @@ class ITBook:
         self.writer: PdfWriter
 
         # Regex patterns
-        self.pattern_num_pipe_label: re.Pattern[str] = rp.page_num_pipe_label()
-        self.pattern_label_pipe_num: re.Pattern[str] = rp.label_pipe_page_num()
-        self.chapter_in_page: re.Pattern[str] = rp.chapter_in_page()
-        self.only_page_number: re.Pattern[str] = rp.only_page_number()
-        self.ignore_labels: re.Pattern[str] = rp.page_labels_to_ignore()
-        self.ignore_text: re.Pattern[str] = rp.text_to_ignore()
+        self.pattern_num_pipe_label: re.Pattern[str] = it.page_num_and_label()
+        self.pattern_label_pipe_num: re.Pattern[str] = it.label_and_page_num()
+        self.chapter_in_page: re.Pattern[str] = it.text_if_only_page_num()
+        self.only_page_number: re.Pattern[str] = it.only_page_number_pages()
+        self.ignore_labels: re.Pattern[str] = it.page_labels_to_ignore()
+        self.ignore_text: re.Pattern[str] = it.text_to_ignore()
 
     def pdf_handler(self) -> None:
         """Initialize the HandleBook class."""
