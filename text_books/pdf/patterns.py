@@ -170,13 +170,3 @@ class ChemBookPatterns:
         return re.compile(
             pattern=r"^\s*Chapter\s*$",
         )
-
-    @staticmethod
-    def page_labels_to_ignore() -> re.Pattern[str]:
-        """
-        Page label patterns to ignore.
-
-        Returns:
-            re.Pattern[str]: Regex pattern.
-        """
-        return re.compile(pattern=r"index|afterword", flags=re.IGNORECASE)
