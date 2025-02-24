@@ -45,26 +45,6 @@ class RegexPatterns(Protocol):
         """
         ...
 
-    @staticmethod
-    def page_labels_to_ignore() -> re.Pattern[str]:
-        """
-        Page label patterns to ignore.
-
-        Returns:
-            re.Pattern[str]: Regex pattern.
-        """
-        ...
-
-    @staticmethod
-    def text_to_ignore() -> re.Pattern[str]:
-        """
-        Page text patterns to ignore.
-
-        Returns:
-            re.Pattern[str]: Regex pattern.
-        """
-        ...
-
 
 class ITBookPatterns:
     """Regex patterns used in the program."""
@@ -200,13 +180,3 @@ class ChemBookPatterns:
             re.Pattern[str]: Regex pattern.
         """
         return re.compile(pattern=r"index|afterword", flags=re.IGNORECASE)
-
-    @staticmethod
-    def text_to_ignore() -> re.Pattern[str]:
-        """
-        Page text patterns to ignore.
-
-        Returns:
-            re.Pattern[str]: Regex pattern.
-        """
-        return re.compile(pattern=r"oreilly\.com", flags=re.IGNORECASE)
