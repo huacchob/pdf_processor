@@ -16,8 +16,7 @@ class HandleBook:
         Args:
             output_pdf (str): The path to the output PDF file.
         """
-        if Path(output_pdf).exists():
-            Path(output_pdf).unlink()
+        Path(output_pdf).unlink(missing_ok=True)
 
     def create_reader(self) -> PdfReader:
         """

@@ -1,5 +1,5 @@
 """Initialize the pdf module."""
 
-from .parsers import Book, ChemBook, ITBook
+from .book import BaseBook, ChemBook, ITBook
 
-__all__: list[str] = ["ITBook", "ChemBook", "Book"]
+__all__: list[str] = ["ITBook", "ChemBook", "BaseBook"]

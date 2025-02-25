@@ -2,10 +2,10 @@
 
 import argparse
 
-from . import Book, ChemBook, ITBook
+from . import BaseBook, ChemBook, ITBook
 from .helper_funcs import parse_tuple
 
-book_class_mapper: dict[str, type[Book]] = {
+book_class_mapper: dict[str, type[BaseBook]] = {
     "IT": ITBook,
     "Chem": ChemBook,
 }
