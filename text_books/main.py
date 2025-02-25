@@ -2,8 +2,13 @@
 
 import argparse
 
-from . import ITBook
+from . import Book, ChemBook, ITBook
 from .helper_funcs import parse_tuple
+
+book_class_mapper: dict[str, type[Book]] = {
+    "IT": ITBook,
+    "Chem": ChemBook,
+}
 
 
 def main() -> None:
@@ -18,9 +23,14 @@ def main() -> None:
         type=parse_tuple,
         help="A tuple of two integers, e.g. '(1,10)'",
     )
+    parser.add_argument(
+        "--book_type",
+        choices=list(book_class_mapper),
+        help="Select the book type to parse.",
+    )
     args: argparse.Namespace = parser.parse_args()
 
-    ITBook(
+    book_class_mapper[args.book_type](
         input_pdf=args.input_pdf,
         output_pdf=args.output_pdf,
         page_range=args.pages if args.pages else None,

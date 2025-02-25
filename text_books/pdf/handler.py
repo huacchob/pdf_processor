@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Sequence
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -7,6 +8,16 @@ class HandleBook:
     def __init__(self, input_pdf: str) -> None:
         self.input_pdf: str = input_pdf
         self.reader: PdfReader
+
+    def delete_file_if_exists(self, output_pdf: str) -> None:
+        """
+        Delete the input PDF file if it exists.
+
+        Args:
+            output_pdf (str): The path to the output PDF file.
+        """
+        if Path(output_pdf).exists():
+            Path(output_pdf).unlink()
 
     def create_reader(self) -> PdfReader:
         """
@@ -34,6 +45,13 @@ class HandleBook:
         return PdfWriter()
 
     def write_to_file(self, output_pdf: str, writer: PdfWriter) -> None:
+        """
+        Write the PDF writer object to a file.
+
+        Args:
+            output_pdf (str): The path to the output PDF file.
+            writer (PdfWriter): The PDF writer object.
+        """
         with open(file=output_pdf, mode="wb") as f:
             writer.write(stream=f)  # type: ignore
 

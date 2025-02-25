@@ -1,5 +1,5 @@
 """Initialize the PDF Parser module."""
 
-from .pdf import ITBook
+from .pdf import Book, ChemBook, ITBook
 
-__all__: list[str] = ["ITBook"]
+__all__: list[str] = ["Book", "ITBook", "ChemBook"]
