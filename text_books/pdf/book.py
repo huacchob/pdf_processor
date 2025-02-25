@@ -1,6 +1,7 @@
 """Module to extract pages from a PDF that belong to chapters."""
 
 from array import array
+from pathlib import Path
 from typing import Sequence
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -75,7 +76,12 @@ class BaseBook:
         if self.page_range:
             self.within_page_range()
 
-        if len(self.writer.pages) != 0:
+        self.book_handler.write_to_file(
+            output_pdf=self.output_pdf,
+            writer=self.writer,
+        )
+
+        if Path(self.output_pdf).exists():
             print(
                 f"New PDF saved as '{self.output_pdf}'.",
             )
