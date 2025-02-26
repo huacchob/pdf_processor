@@ -17,7 +17,7 @@ def parse_tuple(range_str: str) -> tuple[int, int]:
         argparse.ArgumentTypeError: If the input is not in the correct format.
     """
     match_start_end: re.Pattern[str] = re.compile(
-        pattern=r"^(\(|\[)\s*(?P<start>\d+?)\s*,\s*(?P<end>\d+?)\s*(\)|\])$",
+        pattern=r"^(\(|\[)*\s*(?P<start>\d+?)\s*(,|-)\s*(?P<end>\d+?)\s*(\)|\])*$",
     )
     if start_end := match_start_end.search(string=range_str.strip()):
         try:

@@ -2,10 +2,17 @@ from pathlib import Path
 from typing import Sequence
 
 from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.errors import EmptyFileError
 
 
 class HandleBook:
     def __init__(self, input_pdf: str) -> None:
+        """
+        Initialize the HandleBook class.
+
+        Args:
+            input_pdf (str): The path to the input PDF file.
+        """
         self.input_pdf: str = input_pdf
         self.reader: PdfReader
 
@@ -20,10 +27,11 @@ class HandleBook:
 
     def create_reader(self) -> PdfReader:
         """
-        Create a PDF reader object from the input PDF file.
+        Create a PDF reader object.
 
         Raises:
-            FileNotFoundError: If the input PDF file is not found.
+            FileNotFoundError: Raised when the input PDF file is not found.
+            EmptyFileError: Raised when the input PDF file is an empty file.
 
         Returns:
             PdfReader: A PDF reader object.
@@ -32,6 +40,8 @@ class HandleBook:
             self.reader: PdfReader = PdfReader(stream=self.input_pdf)
         except FileNotFoundError as e:
             raise FileNotFoundError(f"File {self.input_pdf} not found.") from e
+        except EmptyFileError as e:
+            raise EmptyFileError(f"File {self.input_pdf} is an empty file.") from e
         return self.reader
 
     def create_writer(self) -> PdfWriter:
@@ -60,5 +70,19 @@ class HandleBook:
         writer: PdfWriter,
         reader: PdfReader,
     ) -> None:
-        for page in page_nums:
-            writer.add_page(page=reader.pages[page])
+        """
+        Add pages to a PDF writer object.
+
+        Args:
+            page_nums (Sequence[int]): A sequence of page numbers.
+            writer (PdfWriter): A PDF writer object.
+            reader (PdfReader): A PDF reader object.
+
+        Raises:
+            IndexError: If a page number is out of range.
+        """
+        try:
+            for page in page_nums:
+                writer.add_page(page=reader.pages[page])
+        except IndexError as e:
+            raise IndexError(f"Page number {page} is out of range.") from e
