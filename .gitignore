@@ -1,0 +1,5 @@
+*.pyc
+**/.ruff_cache
+**/.qodo
+**/.pytest_cache
+**/.mypy_cache

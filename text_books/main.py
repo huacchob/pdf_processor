@@ -12,7 +12,10 @@ book_class_mapper: dict[str, type[BaseBook]] = {
 
 
 def main() -> None:
-    """Run the main function."""
+    """
+    The main function extracts pages from a PDF that belong to chapters based
+    on user input arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Extract pages from a PDF that belong to chapters.",
     )

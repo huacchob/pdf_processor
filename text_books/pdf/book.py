@@ -22,7 +22,22 @@ class BaseBook:
         output_pdf: str,
         page_range: Sequence[int] | None = None,
     ) -> None:
-        """Initialize the ParsePDF class."""
+        """Initialize the BaseBook class."""
+        """
+        Initializes the BaseBook class with input and output PDF paths,
+        optional page range, and object attributes.
+        
+        Args:
+          input_pdf (str): The `input_pdf` parameter is a string that
+            represents the file path of the input PDF file that will be
+            processed by the BaseBook class.
+          output_pdf (str): A string that represents the path or filename of
+            the output PDF file where the processed PDF will be saved.
+          page_range (Sequence[int] | None): Used to specify a sequence of page
+            numbers from the input PDF that should be processed. If
+            `page_range` is set to `None`, it means that all pages in the input
+            PDF will be processed.
+        """
         # Arguments
         self.input_pdf: str = input_pdf
         self.output_pdf: str = output_pdf
@@ -34,7 +49,10 @@ class BaseBook:
         self.writer: PdfWriter
 
     def pdf_handler(self) -> None:
-        """Initialize the HandleBook class."""
+        """
+        Initializes the HandleBook class, deletes the output PDF file if it
+        exists, and creates PdfReader and PdfWriter objects.
+        """
         self.book_handler: HandleBook = HandleBook(
             input_pdf=self.input_pdf,
         )
@@ -43,7 +61,10 @@ class BaseBook:
         self.writer: PdfWriter = self.book_handler.create_writer()
 
     def all_chapter_pages(self) -> None:
-        """Determine if a page is a chapter page."""
+        """
+        This function determines if a page is a chapter page and adds it to the
+        writer.
+        """
         chapter_pages: list[PageObject] = self.reader.pages[
             self.FRONT_MATTER_PAGES : -self.BACK_MATTER_PAGES
         ]
@@ -51,6 +72,14 @@ class BaseBook:
             self.writer.add_page(page=page)
 
     def within_page_range(self) -> None:
+        """
+        This function adds pages to the writer within a specified page range.
+
+        Returns:
+          If the `self.page_range` is empty, the function will return None.
+          Otherwise, it will add pages to the writer based on the specified
+          page range.
+        """
         """Add pages to the writer."""
         if not self.page_range:
             return
@@ -69,7 +98,10 @@ class BaseBook:
         )
 
     def run(self) -> None:
-        """Run the main method to parse a PDF and extract chapter pages."""
+        """
+        The `run` method parses a PDF, extracts chapter pages, and saves the
+        output as a new PDF file.
+        """
         self.pdf_handler()
         if not self.page_range:
             self.all_chapter_pages()
@@ -88,14 +120,14 @@ class BaseBook:
 
 
 class ITBook(BaseBook):
-    """Parse a PDF and extract chapter pages."""
+    """Parse a PDF and extract chapter pages for IT."""
 
     FRONT_MATTER_PAGES: int = 29
     BACK_MATTER_PAGES: int = 24
 
 
 class ChemBook(BaseBook):
-    """Parse a PDF and extract chapter pages."""
+    """Parse a PDF and extract chapter pages for Chemistry."""
 
     FRONT_MATTER_PAGES: int = 36
     BACK_MATTER_PAGES: int = 58
