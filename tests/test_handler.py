@@ -1,3 +1,5 @@
+"""Tests for the HandleBook class."""
+
 from pathlib import Path
 
 from PyPDF2 import PdfWriter
@@ -71,7 +73,7 @@ class TestHandler:
         handler = HandleBook(input_pdf=str(output_file))
         writer: PdfWriter = handler.create_writer()
         handler.add_pages_to_writer(
-            page_nums=[i for i in range(10)],
+            page_nums=list(range(10)),
             writer=writer,
             reader=handler.create_reader(),
         )
@@ -84,7 +86,7 @@ class TestHandler:
         writer: PdfWriter = handler.create_writer()
         try:
             handler.add_pages_to_writer(
-                page_nums=[i for i in range(20)],
+                page_nums=list(range(20)),
                 writer=writer,
                 reader=handler.create_reader(),
             )

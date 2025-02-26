@@ -1,3 +1,5 @@
+"""Argparse helper functions."""
+
 import re
 
 from .exceptions import ImproperPageRange
@@ -23,10 +25,10 @@ def parse_tuple(range_str: str) -> tuple[int, int]:
         try:
             start: int = int(start_end.group("start"))
             end: int = int(start_end.group("end"))
-        except ValueError:
+        except ValueError as e:
             raise ImproperPageRange(
                 "Both values in the tuple must be integers",
-            )
+            ) from e
     else:
         raise ImproperPageRange("Must be a tuple of two integers, e.g. (1,10)")
 

@@ -1,3 +1,5 @@
+"""Class for handling PDF files."""
+
 from pathlib import Path
 from typing import Sequence
 
@@ -6,6 +8,8 @@ from PyPDF2.errors import EmptyFileError
 
 
 class HandleBook:
+    """Handles PDF files."""
+
     def __init__(self, input_pdf: str) -> None:
         """
         Initialize the HandleBook class.
@@ -62,7 +66,7 @@ class HandleBook:
             writer (PdfWriter): The PDF writer object.
         """
         with open(file=output_pdf, mode="wb") as f:
-            writer.write(stream=f)  # type: ignore
+            writer.write(stream=f)
 
     def add_pages_to_writer(
         self,

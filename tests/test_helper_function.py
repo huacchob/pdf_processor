@@ -1,7 +1,11 @@
+"""Test module for helper functions."""
+
 from text_books.helper_funcs import parse_tuple
 
 
 class TestHelperFunctions:
+    """Test class for helper functions."""
+
     def test_parse_tuple_tuple_with_comma(self) -> None:
         """Test that parse_tuple returns a tuple of two integers."""
         assert parse_tuple(range_str="(1,10)") == (1, 10)
