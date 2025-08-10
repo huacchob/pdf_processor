@@ -9,7 +9,7 @@ This project is a tool for extracting specific pages from a PDF document that be
 
 ### Usage
 
-1. Navigate to the top-level `pdf` directory.
+1. Navigate to the top-level `text_books` directory.
 2. Run the script using the command provided in the example above.
 3. Specify the desired book type and page range as needed.
 
@@ -24,7 +24,7 @@ This project is a tool for extracting specific pages from a PDF document that be
 - The output PDF will be saved at the specified path, and a message will be printed confirming its creation.
 
 To run this script, go to the top-level, same level as **text_books** directory.
-Run the command `python3 -m text_books.main "path/to/original/pdf" "path/to/new/pdf" --book_type="Chem" --pages="(1,10)"`
+Run the command `python3 -m text_books.main "path/to/original/pdf" "path/to/new/pdf" --book_type="Chem" --pages="(0,10)"`. The count starts from 0
 
 The **book_type** flag should be set to either "Chem" or "IT".
-The **pages** flag should be set to a tuple of two integers, e.g. "(1,10)".
+The **pages** flag should be set to a tuple of two integers, e.g. "(0,10)".

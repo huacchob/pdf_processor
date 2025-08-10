@@ -122,7 +122,7 @@ class BaseBook:
 class ITBook(BaseBook):
     """Parse a PDF and extract chapter pages for IT."""
 
-    FRONT_MATTER_PAGES: int = 29
+    FRONT_MATTER_PAGES: int = 20
     BACK_MATTER_PAGES: int = 24
 
 
